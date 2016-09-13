@@ -49,7 +49,7 @@ class ViewController: NSViewController {
             return
         }
         
-        setupNewGHCITask([])
+        setupNewGHCITask(nil)
     }
     
     override var representedObject: AnyObject? {
