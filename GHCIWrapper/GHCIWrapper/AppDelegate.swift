@@ -23,5 +23,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
 
+    // MARK: Menubar
+    @IBAction func runClicked(sender: AnyObject?) {
+        NSNotificationCenter.defaultCenter().postNotificationName("RunClicked", object: nil)
+    }
+    
+    @IBAction func openClicked(sender: AnyObject?) {
+        NSNotificationCenter.defaultCenter().postNotificationName("OpenClicked", object: nil)
+    }
+    
+    @IBAction func saveClicked(sender: AnyObject?) {
+        NSNotificationCenter.defaultCenter().postNotificationName("SaveClicked", object: nil)
+    }
+    
+    @IBAction func saveAsClicked(sender: AnyObject?) {
+        NSNotificationCenter.defaultCenter().postNotificationName("SaveAsClicked", object: nil)
+    }
 }
 

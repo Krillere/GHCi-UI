@@ -32,6 +32,11 @@ class ViewController: NSViewController {
     // MARK: OS X vinduer
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.runCode(_:)), name: "RunClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.openFile), name: "OpenClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveFile), name: "SaveClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveAsFile), name: "SaveAsClicked", object: nil)
     }
     
     override func viewDidAppear() {
@@ -44,7 +49,7 @@ class ViewController: NSViewController {
             return
         }
         
-        setupNewGHCITask()
+        setupNewGHCITask([])
     }
     
     override var representedObject: AnyObject? {
@@ -52,6 +57,32 @@ class ViewController: NSViewController {
             // Update the view, if already loaded.
         }
     }
+    
+    
+    // MARK: Knapper
+    @IBAction func sendCommand(sender: AnyObject?) {
+        if let d = (commandView.stringValue+"\n").dataUsingEncoding(NSUTF8StringEncoding) {
+            commandView.stringValue = ""
+            writeHandle?.writeData(d)
+        }
+    }
+    
+    @IBAction func runCode(sender: AnyObject?) {
+        saveAndRunCode()
+    }
+    
+    func openFile() {
+        
+    }
+    
+    func saveFile() {
+        
+    }
+    
+    func saveAsFile() {
+        
+    }
+    
     
     // MARK: Andet UI
     func showNoGHCIError() {
@@ -110,18 +141,27 @@ class ViewController: NSViewController {
     }
     
     func resetUI() {
+        killGHCI()
+        
         codeTextView.clear()
         consoleLogView.clear()
         
-        commandView.stringValue = ""
+        //commandView.stringValue = ""
     }
     
-    // MARK: Knapper
-    @IBAction func sendCommand(sender: AnyObject?) {
-        if let d = (commandView.stringValue+"\n").dataUsingEncoding(NSUTF8StringEncoding) {
-            commandView.stringValue = ""
-            writeHandle?.writeData(d)
+    
+    // MARK: Filhåndtering
+    func saveAndRunCode() {
+        let cont = (codeTextView.textStorage as NSAttributedString!).string
+        do {
+            let path = NSTemporaryDirectory()+"tmp.hs"
+            try cont.writeToFile(path, atomically: true, encoding: NSUTF8StringEncoding)
+            consoleLogView.clear()
+            
+            runHaskellFile(NSURL(string: path)!)
+            commandView.becomeFirstResponder()
         }
+        catch { }
     }
 
     
@@ -192,11 +232,12 @@ class ViewController: NSViewController {
     }
     
     // Laver ny, ren GHCi task
-    func setupNewGHCITask() {
+    func setupNewGHCITask(arguments: [String]?) {
         guard let path = GHCIPath else { return }
         
         proc = NSTask()
         proc?.launchPath = path
+        proc?.arguments = arguments
         
         // Output pipe (Det vi modtager fra ghci)
         outputPipe = NSPipe()
@@ -216,6 +257,17 @@ class ViewController: NSViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.receivedData(_:)), name: NSFileHandleDataAvailableNotification, object: readHandle)
         
         proc?.launch()
+    }
+    
+    func runHaskellFile(file: NSURL) {
+        guard let filePath = file.path else { return }
+        setupNewGHCITask([filePath])
+    }
+    
+    // Stopper nuværende task og pipes
+    func killGHCI() {
+        proc?.terminate()
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSFileHandleDataAvailableNotification, object: readHandle)
     }
     
     // Kaldes når der modtages data i vores handle (Dvs. app'en outputter noget)
