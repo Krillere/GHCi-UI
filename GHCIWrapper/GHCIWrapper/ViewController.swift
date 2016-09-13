@@ -21,7 +21,7 @@ class ViewController: NSViewController {
     var writeHandle:NSFileHandle?
     
     // Filhåndtering
-    
+    var isFileOpen:Bool = false
     
     // UI komponenter
     @IBOutlet var consoleLogView:NSTextView!
@@ -34,9 +34,9 @@ class ViewController: NSViewController {
         super.viewDidLoad()
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.runCode(_:)), name: "RunClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.openFile), name: "OpenClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveFile), name: "SaveClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveAsFile), name: "SaveAsClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.openFileClicked), name: "OpenClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveFileClicked), name: "SaveClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveAsFileClicked), name: "SaveAsClicked", object: nil)
     }
     
     override func viewDidAppear() {
@@ -71,15 +71,20 @@ class ViewController: NSViewController {
         saveAndRunCode()
     }
     
-    func openFile() {
+    func openFileClicked() {
+        if isFileOpen {
+            showFileOpenWarning()
+            return
+        }
+        
         
     }
     
-    func saveFile() {
+    func saveFileClicked() {
         
     }
     
-    func saveAsFile() {
+    func saveAsFileClicked() {
         
     }
     
@@ -104,6 +109,21 @@ class ViewController: NSViewController {
             }
         }
     }
+    
+    func showFileOpenWarning() {
+        let alert = NSAlert()
+        alert.informativeText = "File open"
+        alert.messageText = "A file is currently open. Are you sure you want to open a new one?"
+        alert.addButtonWithTitle("Yes")
+        alert.addButtonWithTitle("No")
+        
+        alert.beginSheetModalForWindow(NSApplication.sharedApplication().windows[0]) { (resp) in
+            if resp == NSAlertFirstButtonReturn {
+                self.userSelectOpenFile()
+            }
+        }
+    }
+    
     
     func userFindGGHCI() {
         let panel = NSOpenPanel()
@@ -164,6 +184,28 @@ class ViewController: NSViewController {
         catch { }
     }
 
+    func userSelectOpenFile() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowedFileTypes = ["hs", "lhs", "o", "so"]
+        
+        panel.beginSheetModalForWindow(NSApplication.sharedApplication().windows[0]) { (resp) in
+            if let URL = panel.URL {
+                do {
+                    let cont = try String(contentsOfURL: URL, encoding: NSUTF8StringEncoding)
+                    self.codeTextView.setText(cont)
+                    self.consoleLogView.clear()
+                    
+                    // TODO: Opdater filvariabler
+                }
+                catch {
+                    // TODO: Håndter fejl..
+                }
+            }
+        }
+    }
     
     // MARK: Task og pipes
     // Tester om det der er på en sti er GHCi

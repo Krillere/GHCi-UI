@@ -17,4 +17,7 @@ extension NSTextView {
     func clear() {
         self.textStorage?.setAttributedString(NSAttributedString(string: ""))
     }
+    func setText(text: String) {
+        self.textStorage?.setAttributedString(NSAttributedString(string: text))
+    }
 }
