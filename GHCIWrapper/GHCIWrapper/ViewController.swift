@@ -20,17 +20,31 @@ class ViewController: NSViewController {
     var inputPipe:NSPipe?
     var writeHandle:NSFileHandle?
     
-    // UI
+    // Filhåndtering
+    
+    
+    // UI komponenter
     @IBOutlet var consoleLogView:NSTextView!
     @IBOutlet var commandView:NSTextField!
+    @IBOutlet var codeTextView:NSTextView!
     
     
+    // MARK: OS X vinduer
     override func viewDidLoad() {
         super.viewDidLoad()
-
+    }
+    
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        
+        // Find GHCi sti eller bed brugeren om at finde den
         GHCIPath = tryFindGHCIPath()
+        if GHCIPath == nil {
+            showNoGHCIError()
+            return
+        }
+        
         setupNewGHCITask()
-        // Do any additional setup after loading the view.
     }
     
     override var representedObject: AnyObject? {
@@ -39,7 +53,70 @@ class ViewController: NSViewController {
         }
     }
     
-    // MARK: UI
+    // MARK: Andet UI
+    func showNoGHCIError() {
+        let window = NSApplication.sharedApplication().windows[0]
+        
+        let alert = NSAlert()
+        alert.messageText = "No CHGi found"
+        alert.informativeText = "GHCi was not found. Would you like to locate the executable yourself?"
+        alert.alertStyle = .CriticalAlertStyle
+        alert.addButtonWithTitle("Yes")
+        alert.addButtonWithTitle("No")
+        
+        alert.beginSheetModalForWindow(window) { (response) in
+            if response == NSAlertFirstButtonReturn {
+                self.userFindGGHCI()
+            }
+            else {
+                self.disableUI()
+            }
+        }
+    }
+    
+    func userFindGGHCI() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.canSelectHiddenExtension = true
+        panel.title = "Locate and select GHCi executable"
+        panel.prompt = "Use"
+        
+        panel.beginSheetModalForWindow(NSApplication.sharedApplication().windows[0]) { (response) in
+            if let selectedURL = panel.URL {
+                if self.testGHCIURL(selectedURL) { // HVis URL'en er korrekt, så gem og fortsæt
+                    print("Gemmer sti: \(selectedURL)")
+                    NSUserDefaults.standardUserDefaults().setValue(selectedURL.absoluteString, forKey: "GHCiPath")
+                    NSUserDefaults.standardUserDefaults().synchronize()
+                    
+                    self.enableUI()
+                }
+                else { // Lad ham prøve igen..
+                    self.showNoGHCIError()
+                }
+            }
+        }
+    }
+    
+    func disableUI() {
+        commandView.enabled = false
+        codeTextView.editable = false
+    }
+    
+    func enableUI() {
+        commandView.enabled = true
+        codeTextView.editable = true
+    }
+    
+    func resetUI() {
+        codeTextView.clear()
+        consoleLogView.clear()
+        
+        commandView.stringValue = ""
+    }
+    
+    // MARK: Knapper
     @IBAction func sendCommand(sender: AnyObject?) {
         if let d = (commandView.stringValue+"\n").dataUsingEncoding(NSUTF8StringEncoding) {
             commandView.stringValue = ""
@@ -49,7 +126,49 @@ class ViewController: NSViewController {
 
     
     // MARK: Task og pipes
+    // Tester om det der er på en sti er GHCi
+    func testGHCIURL(URL: NSURL) -> Bool {
+        guard let path = URL.path else { return false }
+        if !NSFileManager.defaultManager().fileExistsAtPath(path) {
+            print("Ingen fil på valgt placering: \(path)")
+            return false
+        }
+        
+        // Kør app og se om det ser rigtigt ud
+        let pipe = NSPipe()
+        let file = pipe.fileHandleForReading
+        
+        let task = NSTask()
+        task.launchPath = URL.path
+        task.arguments = ["--version"]
+        task.standardOutput = pipe
+        
+        task.launch()
+        
+        let data = file.readDataToEndOfFile()
+        file.closeFile()
+        
+        if let string = String(data: data, encoding: NSUTF8StringEncoding) {
+            // Meget naivt.. :P
+            if string.containsString("Haskell") {
+                return true
+            }
+        }
+        
+        
+        return false
+    }
+    
+    // Forsøger at finde GHCi ud fra kendte stier
     func tryFindGHCIPath() -> String? {
+        // Har vi den gemt allerede?
+        if let remembered = NSUserDefaults.standardUserDefaults().valueForKey("GHCiPath") as? String {
+            if NSFileManager.defaultManager().fileExistsAtPath(remembered) {
+                return remembered
+            }
+        }
+        
+        // Forsøg at finde stien
         let defaultLocations = ["/usr/local/bin/ghci", "/usr/bin/ghci", "~/Library/Haskell/bin/ghci"]
         var foundLoc:String?
         
@@ -62,9 +181,17 @@ class ViewController: NSViewController {
             }
         }
         
+        // Gem lokalt hvis ikke gjort før
+        if foundLoc != nil && NSUserDefaults.standardUserDefaults().valueForKey("GHCiPath") == nil {
+            print("Gemmer sti!")
+            NSUserDefaults.standardUserDefaults().setValue(foundLoc, forKey: "GHCiPath")
+            NSUserDefaults.standardUserDefaults().synchronize()
+        }
+        
         return foundLoc
     }
     
+    // Laver ny, ren GHCi task
     func setupNewGHCITask() {
         guard let path = GHCIPath else { return }
         
@@ -108,8 +235,5 @@ class ViewController: NSViewController {
             print("Noget gik galt..")
         }
     }
-
-
-    // ghci --version
 }
 

@@ -14,4 +14,7 @@ extension NSTextView {
         self.textStorage?.appendAttributedString(NSAttributedString(string: string))
         self.scrollToEndOfDocument(nil)
     }
+    func clear() {
+        self.textStorage?.setAttributedString(NSAttributedString(string: ""))
+    }
 }
