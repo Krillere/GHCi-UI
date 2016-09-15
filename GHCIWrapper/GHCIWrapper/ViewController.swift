@@ -20,12 +20,16 @@ class ViewController: NSViewController {
     var inputPipe:NSPipe?
     var writeHandle:NSFileHandle?
     
+    var previousCommands:Array<String> = []
+    var prevIndex:Int = 0
+    
     // Filhåndtering
     var isFileOpen:Bool = false
+    var currentFileOpen:String?
     
     // UI komponenter
     @IBOutlet var consoleLogView:NSTextView!
-    @IBOutlet var commandView:NSTextField!
+    @IBOutlet var commandView:CommandTextField!
     @IBOutlet var codeTextView:NSTextView!
     
     
@@ -37,6 +41,7 @@ class ViewController: NSViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.openFileClicked), name: "OpenClicked", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveFileClicked), name: "SaveClicked", object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveAsFileClicked), name: "SaveAsClicked", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.upPushed), name: "UpPushed", object: nil)
     }
     
     override func viewDidAppear() {
@@ -49,7 +54,7 @@ class ViewController: NSViewController {
             return
         }
         
-        setupNewGHCITask(nil)
+        setupNewGHCITask([])
     }
     
     override var representedObject: AnyObject? {
@@ -62,6 +67,9 @@ class ViewController: NSViewController {
     // MARK: Knapper
     @IBAction func sendCommand(sender: AnyObject?) {
         if let d = (commandView.stringValue+"\n").dataUsingEncoding(NSUTF8StringEncoding) {
+            previousCommands.append(commandView.stringValue)
+            prevIndex = 0
+            
             commandView.stringValue = ""
             writeHandle?.writeData(d)
         }
@@ -86,6 +94,18 @@ class ViewController: NSViewController {
     
     func saveAsFileClicked() {
         
+    }
+    
+    func upPushed() {
+        if previousCommands.count == 0 {
+            return
+        }
+        
+        if prevIndex+1 >= previousCommands.count {
+            return
+        }
+        
+        commandView.stringValue = previousCommands[prevIndex]
     }
     
     
@@ -162,6 +182,7 @@ class ViewController: NSViewController {
     
     func resetUI() {
         killGHCI()
+        //previousCommands.removeAll()
         
         codeTextView.clear()
         consoleLogView.clear()
@@ -274,7 +295,7 @@ class ViewController: NSViewController {
     }
     
     // Laver ny, ren GHCi task
-    func setupNewGHCITask(arguments: [String]?) {
+    func setupNewGHCITask(arguments: [String]) {
         guard let path = GHCIPath else { return }
         
         proc = NSTask()

@@ -175,10 +175,10 @@
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                             <size key="minSize" width="660" height="213"/>
-                                                            <size key="maxSize" width="660" height="10000000"/>
+                                                            <size key="maxSize" width="662" height="10000000"/>
                                                             <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                             <size key="minSize" width="660" height="213"/>
-                                                            <size key="maxSize" width="660" height="10000000"/>
+                                                            <size key="maxSize" width="662" height="10000000"/>
                                                         </textView>
                                                     </subviews>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -220,7 +220,7 @@
                                         <rect key="frame" x="0.0" y="291" width="692" height="294"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MsH-as-Z6K">
+                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MsH-as-Z6K" customClass="CommandTextField" customModule="GHCIWrapper" customModuleProvider="target">
                                                 <rect key="frame" x="15" y="15" width="662" height="22"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="22" id="iKb-1C-g8J"/>
@@ -245,10 +245,10 @@
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                             <size key="minSize" width="660" height="241"/>
-                                                            <size key="maxSize" width="660" height="10000000"/>
+                                                            <size key="maxSize" width="662" height="10000000"/>
                                                             <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                             <size key="minSize" width="660" height="241"/>
-                                                            <size key="maxSize" width="660" height="10000000"/>
+                                                            <size key="maxSize" width="662" height="10000000"/>
                                                         </textView>
                                                     </subviews>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
