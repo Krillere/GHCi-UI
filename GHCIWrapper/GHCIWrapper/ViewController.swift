@@ -259,10 +259,10 @@ class ViewController: NSViewController {
     
     func setWindowTitle() {
         if isFileOpen && currentFileOpen != nil {
-            self.title = "GHCi UI - "+currentFileOpen!
+            self.view.window?.title = "GHCi UI - "+currentFileOpen!
         }
         else {
-            self.title = "GHCi UI"
+            self.view.window?.title = "GHCi UI"
         }
     }
     
