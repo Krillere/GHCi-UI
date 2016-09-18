@@ -12,13 +12,13 @@ class ViewController: NSViewController {
     
     // GHCI variabler
     var GHCIPath:String?
-    var proc:NSTask?
+    var proc:Process?
     
-    var outputPipe:NSPipe?
-    var readHandle:NSFileHandle?
+    var outputPipe:Pipe?
+    var readHandle:FileHandle?
     
-    var inputPipe:NSPipe?
-    var writeHandle:NSFileHandle?
+    var inputPipe:Pipe?
+    var writeHandle:FileHandle?
     
     var previousCommands:Array<String> = []
     var prevIndex:Int = 0
@@ -37,11 +37,12 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.runCode(_:)), name: "RunClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.openFileClicked), name: "OpenClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveFileClicked), name: "SaveClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.saveAsFileClicked), name: "SaveAsClicked", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.upPushed), name: "UpPushed", object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.runCode(_:)), name: NSNotification.Name(rawValue: "RunClicked"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.openFileClicked), name: NSNotification.Name(rawValue: "OpenClicked"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.saveFileClicked), name: NSNotification.Name(rawValue: "SaveClicked"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.saveAsFileClicked), name: NSNotification.Name(rawValue: "SaveAsClicked"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.upPushed), name: NSNotification.Name(rawValue: "UpPushed"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.downPushed), name: NSNotification.Name(rawValue: "DownPushed"), object: nil)
     }
     
     override func viewDidAppear() {
@@ -56,26 +57,24 @@ class ViewController: NSViewController {
         
         setupNewGHCITask([])
     }
-    
-    override var representedObject: AnyObject? {
-        didSet {
-            // Update the view, if already loaded.
-        }
-    }
-    
+
     
     // MARK: Knapper
-    @IBAction func sendCommand(sender: AnyObject?) {
-        if let d = (commandView.stringValue+"\n").dataUsingEncoding(NSUTF8StringEncoding) {
-            previousCommands.append(commandView.stringValue)
-            prevIndex = 0
+    @IBAction func sendCommand(_ sender: AnyObject?) {
+        let str = commandView.stringValue
+        
+        if let d = (str+"\n").data(using: String.Encoding.utf8) {
+            consoleLogView.append(str+"\n")
+            previousCommands.append(str)
+            
+            prevIndex = -1
             
             commandView.stringValue = ""
-            writeHandle?.writeData(d)
+            writeHandle?.write(d)
         }
     }
     
-    @IBAction func runCode(sender: AnyObject?) {
+    @IBAction func runCode(_ sender: AnyObject?) {
         saveAndRunCode()
     }
     
@@ -85,7 +84,7 @@ class ViewController: NSViewController {
             return
         }
         
-        
+        userSelectOpenFile()
     }
     
     func saveFileClicked() {
@@ -101,47 +100,78 @@ class ViewController: NSViewController {
             return
         }
         
-        if prevIndex+1 >= previousCommands.count {
+        prevIndex += 1
+        
+        // Find index og sæt kommando
+        let index = (previousCommands.count-1)-prevIndex
+        if index <= previousCommands.count-1 && index >= 0 {
+            let cmd = previousCommands[index]
+            commandView.stringValue = cmd
+        }
+        else {
+            prevIndex -= 1
+        }
+    }
+    
+    func downPushed() {
+        if previousCommands.count == 0 {
+            return
+        }
+        if prevIndex == -1 {
             return
         }
         
-        commandView.stringValue = previousCommands[prevIndex]
+        prevIndex -= 1
+        
+        if prevIndex == -1 {
+            commandView.stringValue = ""
+            return
+        }
+        
+        let index = (previousCommands.count-1)-prevIndex
+        if index <= previousCommands.count-1 && index >= 0 {
+            let cmd = previousCommands[index]
+            commandView.stringValue = cmd
+        }
+        else {
+            prevIndex += 1
+        }
     }
     
     
     // MARK: Andet UI
     func showNoGHCIError() {
-        let window = NSApplication.sharedApplication().windows[0]
+        let window = NSApplication.shared().windows[0]
         
         let alert = NSAlert()
         alert.messageText = "No CHGi found"
         alert.informativeText = "GHCi was not found. Would you like to locate the executable yourself?"
-        alert.alertStyle = .CriticalAlertStyle
-        alert.addButtonWithTitle("Yes")
-        alert.addButtonWithTitle("No")
+        alert.alertStyle = .critical
+        alert.addButton(withTitle: "Yes")
+        alert.addButton(withTitle: "No")
         
-        alert.beginSheetModalForWindow(window) { (response) in
+        alert.beginSheetModal(for: window, completionHandler: { (response) in
             if response == NSAlertFirstButtonReturn {
                 self.userFindGGHCI()
             }
             else {
                 self.disableUI()
             }
-        }
+        }) 
     }
     
     func showFileOpenWarning() {
         let alert = NSAlert()
         alert.informativeText = "File open"
         alert.messageText = "A file is currently open. Are you sure you want to open a new one?"
-        alert.addButtonWithTitle("Yes")
-        alert.addButtonWithTitle("No")
+        alert.addButton(withTitle: "Yes")
+        alert.addButton(withTitle: "No")
         
-        alert.beginSheetModalForWindow(NSApplication.sharedApplication().windows[0]) { (resp) in
+        alert.beginSheetModal(for: NSApplication.shared().windows[0], completionHandler: { (resp) in
             if resp == NSAlertFirstButtonReturn {
                 self.userSelectOpenFile()
             }
-        }
+        }) 
     }
     
     
@@ -154,12 +184,12 @@ class ViewController: NSViewController {
         panel.title = "Locate and select GHCi executable"
         panel.prompt = "Use"
         
-        panel.beginSheetModalForWindow(NSApplication.sharedApplication().windows[0]) { (response) in
-            if let selectedURL = panel.URL {
+        panel.beginSheetModal(for: NSApplication.shared().windows[0]) { (response) in
+            if let selectedURL = panel.url {
                 if self.testGHCIURL(selectedURL) { // HVis URL'en er korrekt, så gem og fortsæt
                     print("Gemmer sti: \(selectedURL)")
-                    NSUserDefaults.standardUserDefaults().setValue(selectedURL.absoluteString, forKey: "GHCiPath")
-                    NSUserDefaults.standardUserDefaults().synchronize()
+                    UserDefaults.standard.setValue(selectedURL.absoluteString, forKey: "GHCiPath")
+                    UserDefaults.standard.synchronize()
                     
                     self.enableUI()
                 }
@@ -171,13 +201,13 @@ class ViewController: NSViewController {
     }
     
     func disableUI() {
-        commandView.enabled = false
-        codeTextView.editable = false
+        commandView.isEnabled = false
+        codeTextView.isEditable = false
     }
     
     func enableUI() {
-        commandView.enabled = true
-        codeTextView.editable = true
+        commandView.isEnabled = true
+        codeTextView.isEditable = true
     }
     
     func resetUI() {
@@ -196,10 +226,10 @@ class ViewController: NSViewController {
         let cont = (codeTextView.textStorage as NSAttributedString!).string
         do {
             let path = NSTemporaryDirectory()+"tmp.hs"
-            try cont.writeToFile(path, atomically: true, encoding: NSUTF8StringEncoding)
+            try cont.write(toFile: path, atomically: true, encoding: String.Encoding.utf8)
             consoleLogView.clear()
             
-            runHaskellFile(NSURL(string: path)!)
+            runHaskellFile(URL(string: path)!)
             commandView.becomeFirstResponder()
         }
         catch { }
@@ -212,14 +242,15 @@ class ViewController: NSViewController {
         panel.canChooseDirectories = false
         panel.allowedFileTypes = ["hs", "lhs", "o", "so"]
         
-        panel.beginSheetModalForWindow(NSApplication.sharedApplication().windows[0]) { (resp) in
-            if let URL = panel.URL {
+        panel.beginSheetModal(for: NSApplication.shared().windows[0]) { (resp) in
+            if let URL = panel.url {
                 do {
-                    let cont = try String(contentsOfURL: URL, encoding: NSUTF8StringEncoding)
+                    let cont = try String(contentsOf: URL, encoding: String.Encoding.utf8)
                     self.codeTextView.setText(cont)
                     self.consoleLogView.clear()
                     
-                    // TODO: Opdater filvariabler
+                    self.currentFileOpen = URL.path
+                    self.isFileOpen = true
                 }
                 catch {
                     // TODO: Håndter fejl..
@@ -230,18 +261,18 @@ class ViewController: NSViewController {
     
     // MARK: Task og pipes
     // Tester om det der er på en sti er GHCi
-    func testGHCIURL(URL: NSURL) -> Bool {
-        guard let path = URL.path else { return false }
-        if !NSFileManager.defaultManager().fileExistsAtPath(path) {
+    func testGHCIURL(_ URL: Foundation.URL) -> Bool {
+        let path = URL.path
+        if !FileManager.default.fileExists(atPath: path) {
             print("Ingen fil på valgt placering: \(path)")
             return false
         }
         
         // Kør app og se om det ser rigtigt ud
-        let pipe = NSPipe()
+        let pipe = Pipe()
         let file = pipe.fileHandleForReading
         
-        let task = NSTask()
+        let task = Process()
         task.launchPath = URL.path
         task.arguments = ["--version"]
         task.standardOutput = pipe
@@ -251,9 +282,9 @@ class ViewController: NSViewController {
         let data = file.readDataToEndOfFile()
         file.closeFile()
         
-        if let string = String(data: data, encoding: NSUTF8StringEncoding) {
+        if let string = String(data: data, encoding: String.Encoding.utf8) {
             // Meget naivt.. :P
-            if string.containsString("Haskell") {
+            if string.contains("Haskell") {
                 return true
             }
         }
@@ -265,8 +296,8 @@ class ViewController: NSViewController {
     // Forsøger at finde GHCi ud fra kendte stier
     func tryFindGHCIPath() -> String? {
         // Har vi den gemt allerede?
-        if let remembered = NSUserDefaults.standardUserDefaults().valueForKey("GHCiPath") as? String {
-            if NSFileManager.defaultManager().fileExistsAtPath(remembered) {
+        if let remembered = UserDefaults.standard.value(forKey: "GHCiPath") as? String {
+            if FileManager.default.fileExists(atPath: remembered) {
                 return remembered
             }
         }
@@ -276,7 +307,7 @@ class ViewController: NSViewController {
         var foundLoc:String?
         
         for loc in defaultLocations {
-            if NSFileManager.defaultManager().fileExistsAtPath(loc) {
+            if FileManager.default.fileExists(atPath: loc) {
                 print("Fundet GHCI ved: \(loc)")
                 
                 foundLoc = loc
@@ -285,25 +316,25 @@ class ViewController: NSViewController {
         }
         
         // Gem lokalt hvis ikke gjort før
-        if foundLoc != nil && NSUserDefaults.standardUserDefaults().valueForKey("GHCiPath") == nil {
+        if foundLoc != nil && UserDefaults.standard.value(forKey: "GHCiPath") == nil {
             print("Gemmer sti!")
-            NSUserDefaults.standardUserDefaults().setValue(foundLoc, forKey: "GHCiPath")
-            NSUserDefaults.standardUserDefaults().synchronize()
+            UserDefaults.standard.setValue(foundLoc, forKey: "GHCiPath")
+            UserDefaults.standard.synchronize()
         }
         
         return foundLoc
     }
     
     // Laver ny, ren GHCi task
-    func setupNewGHCITask(arguments: [String]) {
+    func setupNewGHCITask(_ arguments: [String]) {
         guard let path = GHCIPath else { return }
         
-        proc = NSTask()
+        proc = Process()
         proc?.launchPath = path
         proc?.arguments = arguments
         
         // Output pipe (Det vi modtager fra ghci)
-        outputPipe = NSPipe()
+        outputPipe = Pipe()
         proc?.standardOutput = outputPipe
         proc?.standardError = outputPipe
         
@@ -311,38 +342,39 @@ class ViewController: NSViewController {
         readHandle?.waitForDataInBackgroundAndNotify()
         
         // Input (Det vi skriver)
-        inputPipe = NSPipe()
+        inputPipe = Pipe()
         proc?.standardInput = inputPipe
         
         writeHandle = inputPipe?.fileHandleForWriting
         
         // Så vi får notifkation ved output
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ViewController.receivedData(_:)), name: NSFileHandleDataAvailableNotification, object: readHandle)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.receivedData(_:)), name: NSNotification.Name.NSFileHandleDataAvailable, object: readHandle)
         
         proc?.launch()
+        commandView.becomeFirstResponder()
     }
     
-    func runHaskellFile(file: NSURL) {
-        guard let filePath = file.path else { return }
+    func runHaskellFile(_ file: URL) {
+        let filePath = file.path
         setupNewGHCITask([filePath])
     }
     
     // Stopper nuværende task og pipes
     func killGHCI() {
         proc?.terminate()
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSFileHandleDataAvailableNotification, object: readHandle)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSFileHandleDataAvailable, object: readHandle)
     }
     
     // Kaldes når der modtages data i vores handle (Dvs. app'en outputter noget)
-    func receivedData(notif: NSNotification) {
-        guard let fh = notif.object as? NSFileHandle else { print("Fuck"); return }
+    func receivedData(_ notif: Notification) {
+        guard let fh = notif.object as? FileHandle else { print("Fuck"); return }
         
         let data = fh.availableData
-        if data.length > 0 {
+        if data.count > 0 {
             readHandle?.waitForDataInBackgroundAndNotify()
             fh.waitForDataInBackgroundAndNotify()
             
-            if let str = String(data: data, encoding: NSUTF8StringEncoding) {
+            if let str = String(data: data, encoding: String.Encoding.utf8) {
                 consoleLogView.append(str)
             }
         }

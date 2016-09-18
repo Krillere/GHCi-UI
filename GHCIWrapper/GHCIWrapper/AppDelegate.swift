@@ -13,31 +13,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
 
-    func applicationDidFinishLaunching(aNotification: NSNotification) {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
 
     }
 
-    func applicationWillTerminate(aNotification: NSNotification) {
+    func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
     }
 
 
     // MARK: Menubar
-    @IBAction func runClicked(sender: AnyObject?) {
-        NSNotificationCenter.defaultCenter().postNotificationName("RunClicked", object: nil)
+    @IBAction func runClicked(_ sender: AnyObject?) {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "RunClicked"), object: nil)
     }
     
-    @IBAction func openClicked(sender: AnyObject?) {
-        NSNotificationCenter.defaultCenter().postNotificationName("OpenClicked", object: nil)
+    @IBAction func openClicked(_ sender: AnyObject?) {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "OpenClicked"), object: nil)
     }
     
-    @IBAction func saveClicked(sender: AnyObject?) {
-        NSNotificationCenter.defaultCenter().postNotificationName("SaveClicked", object: nil)
+    @IBAction func saveClicked(_ sender: AnyObject?) {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "SaveClicked"), object: nil)
     }
     
-    @IBAction func saveAsClicked(sender: AnyObject?) {
-        NSNotificationCenter.defaultCenter().postNotificationName("SaveAsClicked", object: nil)
+    @IBAction func saveAsClicked(_ sender: AnyObject?) {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "SaveAsClicked"), object: nil)
     }
 }
 

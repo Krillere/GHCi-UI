@@ -10,14 +10,14 @@ import Foundation
 import Cocoa
 
 extension NSTextView {
-    func append(string: String) {
-        self.textStorage?.appendAttributedString(NSAttributedString(string: string))
+    func append(_ string: String) {
+        self.textStorage?.append(NSAttributedString(string: string))
         self.scrollToEndOfDocument(nil)
     }
     func clear() {
         self.textStorage?.setAttributedString(NSAttributedString(string: ""))
     }
-    func setText(text: String) {
+    func setText(_ text: String) {
         self.textStorage?.setAttributedString(NSAttributedString(string: text))
     }
 }

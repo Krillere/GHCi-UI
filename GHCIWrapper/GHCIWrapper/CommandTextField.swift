@@ -10,13 +10,13 @@ import Cocoa
 
 class CommandTextField: NSTextField {
     
-    override func drawRect(dirtyRect: NSRect) {
-        super.drawRect(dirtyRect)
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
         
         // Drawing code here.
     }
     
-    func handleCommandEvent(theEvent: NSEvent) -> Bool {
+    func handleCommandEvent(_ theEvent: NSEvent) -> Bool {
         
         let responder = self.window?.firstResponder
         let textView = responder as! NSTextView
@@ -28,7 +28,7 @@ class CommandTextField: NSTextField {
         
         //6 Z, 7 X, 8 C, 9 V, A 0
         if keyCode == 6 {
-            if theEvent.modifierFlags.contains(NSEventModifierFlags.ShiftKeyMask) {
+            if theEvent.modifierFlags.contains(NSEventModifierFlags.shift) {
                 if ((textView.undoManager?.canRedo) != nil) {
                     textView.undoManager?.redo()
                     bHandled = true
@@ -61,10 +61,10 @@ class CommandTextField: NSTextField {
         return bHandled
     }
     
-    override func performKeyEquivalent(theEvent: NSEvent) -> Bool {
+    override func performKeyEquivalent(with theEvent: NSEvent) -> Bool {
         
         // Command (c/p, select og undo/redo)
-        if theEvent.type == .KeyDown && theEvent.modifierFlags.contains(NSEventModifierFlags.CommandKeyMask) {
+        if theEvent.type == .keyDown && theEvent.modifierFlags.contains(NSEventModifierFlags.command) {
             let responder = self.window?.firstResponder
             
             if responder != nil && responder is NSTextView {
@@ -76,9 +76,12 @@ class CommandTextField: NSTextField {
                 }
             }
         }
-        else if theEvent.type == .KeyDown { // Anden tast
+        else if theEvent.type == .keyDown { // Anden tast
             if theEvent.keyCode == 126 {
-                NSNotificationCenter.defaultCenter().postNotificationName("UpPushed", object: self)
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "UpPushed"), object: self)
+            }
+            else if theEvent.keyCode == 125 {
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "DownPushed"), object: self)
             }
         }
         
