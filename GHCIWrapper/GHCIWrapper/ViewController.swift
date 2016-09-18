@@ -15,7 +15,9 @@ class ViewController: NSViewController {
     var proc:Process?
     
     var outputPipe:Pipe?
+    var errorPipe:Pipe?
     var readHandle:FileHandle?
+    var errorHandle:FileHandle?
     
     var inputPipe:Pipe?
     var writeHandle:FileHandle?
@@ -26,6 +28,7 @@ class ViewController: NSViewController {
     // Filhåndtering
     var isFileOpen:Bool = false
     var currentFileOpen:String?
+    let haskellFileTypes:Array<String> = ["hs", "lhs", "o", "so"]
     
     // UI komponenter
     @IBOutlet var consoleLogView:NSTextView!
@@ -78,6 +81,16 @@ class ViewController: NSViewController {
         saveAndRunCode()
     }
     
+    // Filhåndteringsknapper
+    func writeCodeToFile(file: String) {
+        // Find indhold og skriv til disk
+        let cont = (codeTextView.textStorage as NSAttributedString!).string
+        do {
+            try cont.write(toFile: file, atomically: true, encoding: String.Encoding.utf8)
+        }
+        catch { }
+    }
+    
     func openFileClicked() {
         if isFileOpen {
             showFileOpenWarning()
@@ -88,13 +101,37 @@ class ViewController: NSViewController {
     }
     
     func saveFileClicked() {
+        // Hvis ingen fil åben, så bed bruger om at lave ny
+        if !isFileOpen {
+            saveAsFileClicked()
+            return
+        }
         
+        guard let file = currentFileOpen else { return }
+        self.writeCodeToFile(file: file)
     }
     
     func saveAsFileClicked() {
+        let panel = NSSavePanel()
+        panel.allowedFileTypes = haskellFileTypes
+        if currentFileOpen != nil {
+            panel.nameFieldStringValue = currentFileOpen!
+        }
         
+        panel.beginSheetModal(for: NSApplication.shared().windows[0]) { (res) in
+            if res == 1 {
+                guard let URL = panel.url else { return }
+                
+                self.currentFileOpen = URL.path
+                self.isFileOpen = true
+                
+                self.setWindowTitle()
+                self.writeCodeToFile(file: URL.path)
+            }
+        }
     }
     
+    // Up og ned knapper til kommandoer
     func upPushed() {
         if previousCommands.count == 0 {
             return
@@ -162,8 +199,8 @@ class ViewController: NSViewController {
     
     func showFileOpenWarning() {
         let alert = NSAlert()
-        alert.informativeText = "File open"
-        alert.messageText = "A file is currently open. Are you sure you want to open a new one?"
+        alert.messageText = "File open"
+        alert.informativeText = "A file is currently open. Are you sure you want to open a new one?"
         alert.addButton(withTitle: "Yes")
         alert.addButton(withTitle: "No")
         
@@ -174,7 +211,7 @@ class ViewController: NSViewController {
         }) 
     }
     
-    
+    // Lad brugeren finde GHCi selv
     func userFindGGHCI() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
@@ -220,6 +257,15 @@ class ViewController: NSViewController {
         //commandView.stringValue = ""
     }
     
+    func setWindowTitle() {
+        if isFileOpen && currentFileOpen != nil {
+            self.title = "GHCi UI - "+currentFileOpen!
+        }
+        else {
+            self.title = "GHCi UI"
+        }
+    }
+    
     
     // MARK: Filhåndtering
     func saveAndRunCode() {
@@ -240,24 +286,28 @@ class ViewController: NSViewController {
         panel.allowsMultipleSelection = false
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
-        panel.allowedFileTypes = ["hs", "lhs", "o", "so"]
+        panel.allowedFileTypes = haskellFileTypes
         
         panel.beginSheetModal(for: NSApplication.shared().windows[0]) { (resp) in
-            if let URL = panel.url {
-                do {
-                    let cont = try String(contentsOf: URL, encoding: String.Encoding.utf8)
-                    self.codeTextView.setText(cont)
-                    self.consoleLogView.clear()
-                    
-                    self.currentFileOpen = URL.path
-                    self.isFileOpen = true
-                }
-                catch {
-                    // TODO: Håndter fejl..
+            if resp == 1 {
+                if let URL = panel.url {
+                    do {
+                        let cont = try String(contentsOf: URL, encoding: String.Encoding.utf8)
+                        self.codeTextView.setText(cont)
+                        self.consoleLogView.clear()
+                        
+                        self.currentFileOpen = URL.path
+                        self.isFileOpen = true
+                        self.setWindowTitle()
+                    }
+                    catch {
+                        // TODO: Håndter fejl..
+                    }
                 }
             }
         }
     }
+    
     
     // MARK: Task og pipes
     // Tester om det der er på en sti er GHCi
@@ -335,11 +385,15 @@ class ViewController: NSViewController {
         
         // Output pipe (Det vi modtager fra ghci)
         outputPipe = Pipe()
+        errorPipe = Pipe()
         proc?.standardOutput = outputPipe
-        proc?.standardError = outputPipe
+        proc?.standardError = errorPipe
         
         readHandle = outputPipe?.fileHandleForReading
         readHandle?.waitForDataInBackgroundAndNotify()
+        
+        errorHandle = errorPipe?.fileHandleForReading
+        errorHandle?.waitForDataInBackgroundAndNotify()
         
         // Input (Det vi skriver)
         inputPipe = Pipe()
@@ -349,6 +403,7 @@ class ViewController: NSViewController {
         
         // Så vi får notifkation ved output
         NotificationCenter.default.addObserver(self, selector: #selector(ViewController.receivedData(_:)), name: NSNotification.Name.NSFileHandleDataAvailable, object: readHandle)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.receivedErrorData(_:)), name: NSNotification.Name.NSFileHandleDataAvailable, object: errorHandle)
         
         proc?.launch()
         commandView.becomeFirstResponder()
@@ -365,6 +420,7 @@ class ViewController: NSViewController {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSFileHandleDataAvailable, object: readHandle)
     }
     
+    
     // Kaldes når der modtages data i vores handle (Dvs. app'en outputter noget)
     func receivedData(_ notif: Notification) {
         guard let fh = notif.object as? FileHandle else { print("Fuck"); return }
@@ -378,8 +434,20 @@ class ViewController: NSViewController {
                 consoleLogView.append(str)
             }
         }
-        else {
-            print("Noget gik galt..")
+    }
+    
+    // Kaldes når der modtages en error i vores handle
+    func receivedErrorData(_ notif: Notification) {
+        guard let fh = notif.object as? FileHandle else { print("Fuck"); return }
+        
+        let data = fh.availableData
+        if data.count > 0 {
+            errorHandle?.waitForDataInBackgroundAndNotify()
+            fh.waitForDataInBackgroundAndNotify()
+            
+            if let str = String(data: data, encoding: String.Encoding.utf8) {
+                consoleLogView.appendError(str)
+            }
         }
     }
 }

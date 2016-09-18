@@ -14,6 +14,11 @@ extension NSTextView {
         self.textStorage?.append(NSAttributedString(string: string))
         self.scrollToEndOfDocument(nil)
     }
+    func appendError(_ string: String) {
+        let str = NSAttributedString(string: string, attributes: [NSForegroundColorAttributeName:NSColor.red])
+        self.textStorage?.append(str)
+        self.scrollToEndOfDocument(nil)
+    }
     func clear() {
         self.textStorage?.setAttributedString(NSAttributedString(string: ""))
     }
