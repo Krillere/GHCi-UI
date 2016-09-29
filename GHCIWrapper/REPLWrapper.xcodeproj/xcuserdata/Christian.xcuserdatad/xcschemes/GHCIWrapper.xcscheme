@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AA0EAC3A1D88702D008A4CB1"
-               BuildableName = "GHCIWrapper.app"
-               BlueprintName = "GHCIWrapper"
-               ReferencedContainer = "container:GHCIWrapper.xcodeproj">
+               BuildableName = "REPLWrapper.app"
+               BlueprintName = "REPLWrapper"
+               ReferencedContainer = "container:REPLWrapper.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AA0EAC3A1D88702D008A4CB1"
-            BuildableName = "GHCIWrapper.app"
-            BlueprintName = "GHCIWrapper"
-            ReferencedContainer = "container:GHCIWrapper.xcodeproj">
+            BuildableName = "REPLWrapper.app"
+            BlueprintName = "REPLWrapper"
+            ReferencedContainer = "container:REPLWrapper.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -56,9 +56,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AA0EAC3A1D88702D008A4CB1"
-            BuildableName = "GHCIWrapper.app"
-            BlueprintName = "GHCIWrapper"
-            ReferencedContainer = "container:GHCIWrapper.xcodeproj">
+            BuildableName = "REPLWrapper.app"
+            BlueprintName = "REPLWrapper"
+            ReferencedContainer = "container:REPLWrapper.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -75,9 +75,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AA0EAC3A1D88702D008A4CB1"
-            BuildableName = "GHCIWrapper.app"
-            BlueprintName = "GHCIWrapper"
-            ReferencedContainer = "container:GHCIWrapper.xcodeproj">
+            BuildableName = "REPLWrapper.app"
+            BlueprintName = "REPLWrapper"
+            ReferencedContainer = "container:REPLWrapper.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

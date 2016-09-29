@@ -11,11 +11,11 @@
                 <application id="hnw-xV-0zn" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
                         <items>
-                            <menuItem title="GHCIWrapper" id="1Xt-HY-uBw">
+                            <menuItem title="REPLWrapper" id="1Xt-HY-uBw">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="GHCIWrapper" systemMenu="apple" id="uQy-DD-JDr">
+                                <menu key="submenu" title="REPLWrapper" systemMenu="apple" id="uQy-DD-JDr">
                                     <items>
-                                        <menuItem title="About GHCIWrapper" id="5kV-Vb-QxS">
+                                        <menuItem title="About REPLWrapper" id="5kV-Vb-QxS">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="Ady-hI-5gd" id="Exp-CZ-Vem"/>
@@ -29,7 +29,7 @@
                                             <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                                        <menuItem title="Hide GHCIWrapper" keyEquivalent="h" id="Olw-nP-bQN">
+                                        <menuItem title="Hide REPLWrapper" keyEquivalent="h" id="Olw-nP-bQN">
                                             <connections>
                                                 <action selector="hide:" target="Ady-hI-5gd" id="PnN-Uc-m68"/>
                                             </connections>
@@ -47,7 +47,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                                        <menuItem title="Quit GHCIWrapper" keyEquivalent="q" id="4sb-4s-VLi">
+                                        <menuItem title="Quit REPLWrapper" keyEquivalent="q" id="4sb-4s-VLi">
                                             <connections>
                                                 <action selector="terminate:" target="Ady-hI-5gd" id="Te7-pn-YzF"/>
                                             </connections>
@@ -84,6 +84,10 @@
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="Environment" id="Qdf-uX-jBY">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Environment" id="HBI-g3-fNb"/>
+                            </menuItem>
                             <menuItem title="Window" id="aUF-d1-5bR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
@@ -113,7 +117,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                                     <items>
-                                        <menuItem title="GHCIWrapper Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                                        <menuItem title="REPLWrapper Help" keyEquivalent="?" id="FKE-Sm-Kum">
                                             <connections>
                                                 <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
                                             </connections>
@@ -127,16 +131,21 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="GHCIWrapper" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="REPLWrapper" customModuleProvider="target">
+                    <connections>
+                        <outlet property="environmentMenu" destination="HBI-g3-fNb" id="rz7-Wb-MOB"/>
+                        <outlet property="environmentMenuItem" destination="Qdf-uX-jBY" id="EVu-Z8-FpU"/>
+                    </connections>
+                </customObject>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="-118"/>
+            <point key="canvasLocation" x="158" y="-82"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
             <objects>
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
-                    <window key="window" title="GHCi UI" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" oneShot="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
+                    <window key="window" title="REPL UI" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" oneShot="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
                         <rect key="contentRect" x="550" y="240" width="633" height="559"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
@@ -152,7 +161,7 @@
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="GHCIWrapper" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="REPLWrapper" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="692" height="585"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -170,7 +179,7 @@
                                                     <rect key="frame" x="1" y="1" width="660" height="213"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <textView importsGraphics="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="WBi-cg-PtE">
+                                                        <textView importsGraphics="NO" richText="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="WBi-cg-PtE">
                                                             <rect key="frame" x="0.0" y="0.0" width="660" height="213"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -218,7 +227,7 @@
                                         <rect key="frame" x="0.0" y="291" width="692" height="294"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <subviews>
-                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MsH-as-Z6K" customClass="CommandTextField" customModule="GHCIWrapper" customModuleProvider="target">
+                                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="MsH-as-Z6K" customClass="CommandTextField" customModule="REPLWrapper" customModuleProvider="target">
                                                 <rect key="frame" x="15" y="15" width="662" height="22"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="22" id="iKb-1C-g8J"/>
@@ -290,11 +299,83 @@
                         <outlet property="codeTextView" destination="WBi-cg-PtE" id="oVV-vg-MKz"/>
                         <outlet property="commandView" destination="MsH-as-Z6K" id="XgF-as-xfQ"/>
                         <outlet property="consoleLogView" destination="eiI-Yy-2AC" id="UxT-pf-nZQ"/>
+                        <segue destination="yp0-GP-Ih5" kind="sheet" identifier="SelectEnvironment" id="Bjt-fL-oFp"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="151" y="1145.5"/>
+        </scene>
+        <!--Environment Select View Controller-->
+        <scene sceneID="D6z-e8-kgc">
+            <objects>
+                <viewController id="yp0-GP-Ih5" customClass="EnvironmentSelectViewController" customModule="REPLWrapper" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="ZOv-NY-hkL">
+                        <rect key="frame" x="0.0" y="0.0" width="349" height="127"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zi0-6P-mNv">
+                                <rect key="frame" x="67" y="64" width="217" height="26"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="SNC-6D-FVu"/>
+                                    <constraint firstAttribute="width" constant="212" id="dT4-Gn-QgZ"/>
+                                </constraints>
+                                <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="6YM-b7-mQr" id="Vem-9a-rmL">
+                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="menu"/>
+                                    <menu key="menu" id="HyO-eG-acX">
+                                        <items>
+                                            <menuItem title="Item 1" state="on" id="6YM-b7-mQr"/>
+                                            <menuItem title="Item 2" id="eHD-2D-8gh"/>
+                                            <menuItem title="Item 3" id="esX-4s-YTF"/>
+                                        </items>
+                                    </menu>
+                                </popUpButtonCell>
+                            </popUpButton>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2t2-c8-bn3">
+                                <rect key="frame" x="101" y="8" width="148" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="Iax-Fp-5eU"/>
+                                    <constraint firstAttribute="width" constant="136" id="Ljl-VE-0Dz"/>
+                                </constraints>
+                                <buttonCell key="cell" type="push" title="Save environment" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jlb-ui-GFh">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="saveEnvironmentWithSender:" target="yp0-GP-Ih5" id="c4H-tM-4gr"/>
+                                </connections>
+                            </button>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="W9n-B0-ihd">
+                                <rect key="frame" x="92" y="96" width="166" height="17"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="17" id="ZPv-zA-dH6"/>
+                                    <constraint firstAttribute="width" constant="162" id="vzg-TT-9oY"/>
+                                </constraints>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Select environment to use:" id="kss-G4-mii">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="W9n-B0-ihd" firstAttribute="centerX" secondItem="ZOv-NY-hkL" secondAttribute="centerX" id="HUn-Hw-gxP"/>
+                            <constraint firstItem="Zi0-6P-mNv" firstAttribute="top" secondItem="W9n-B0-ihd" secondAttribute="bottom" constant="8" id="ISz-ej-26x"/>
+                            <constraint firstItem="W9n-B0-ihd" firstAttribute="top" secondItem="ZOv-NY-hkL" secondAttribute="top" constant="14" id="MRw-4d-aJY"/>
+                            <constraint firstItem="2t2-c8-bn3" firstAttribute="centerX" secondItem="ZOv-NY-hkL" secondAttribute="centerX" id="OPX-7d-vWs"/>
+                            <constraint firstItem="Zi0-6P-mNv" firstAttribute="centerX" secondItem="ZOv-NY-hkL" secondAttribute="centerX" id="PxI-6p-DfZ"/>
+                            <constraint firstAttribute="bottom" secondItem="2t2-c8-bn3" secondAttribute="bottom" constant="15" id="ZHp-t4-Bhs"/>
+                            <constraint firstItem="2t2-c8-bn3" firstAttribute="top" secondItem="Zi0-6P-mNv" secondAttribute="bottom" constant="31" id="dMb-ZU-yKS"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="knownEnvironmentPopup" destination="Zi0-6P-mNv" id="coa-ax-P78"/>
+                    </connections>
+                </viewController>
+                <customObject id="Sod-Pv-pAS" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="773.5" y="1145.5"/>
         </scene>
     </scenes>
 </document>

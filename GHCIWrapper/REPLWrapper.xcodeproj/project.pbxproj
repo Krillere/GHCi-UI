@@ -13,17 +13,27 @@
 		AA0EAC431D88702D008A4CB1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0EAC421D88702D008A4CB1 /* Assets.xcassets */; };
 		AA0EAC461D88702D008A4CB1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA0EAC441D88702D008A4CB1 /* Main.storyboard */; };
 		AA0EAC4F1D8879AE008A4CB1 /* NSTextViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0EAC4E1D8879AE008A4CB1 /* NSTextViewExtension.swift */; };
+		AAD71D481D9CF57D0070841B /* Haskell.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD71D471D9CF57D0070841B /* Haskell.plist */; };
+		AAD71D4A1D9CF8F90070841B /* Racket.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD71D491D9CF8F90070841B /* Racket.plist */; };
+		AAD71D4E1D9CFB400070841B /* Environments.plist in Resources */ = {isa = PBXBuildFile; fileRef = AAD71D4D1D9CFB400070841B /* Environments.plist */; };
+		AAD71D501D9CFB910070841B /* EnvironmentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD71D4F1D9CFB910070841B /* EnvironmentHandler.swift */; };
+		AAD71D521D9CFF700070841B /* EnvironmentSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD71D511D9CFF700070841B /* EnvironmentSelectViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AA0C9DF61D8A84FA00D4D966 /* CommandTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandTextField.swift; sourceTree = "<group>"; };
-		AA0EAC3B1D88702D008A4CB1 /* GHCIWrapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GHCIWrapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0EAC3B1D88702D008A4CB1 /* REPLWrapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = REPLWrapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0EAC3E1D88702D008A4CB1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AA0EAC401D88702D008A4CB1 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AA0EAC421D88702D008A4CB1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0EAC451D88702D008A4CB1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AA0EAC471D88702D008A4CB1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0EAC4E1D8879AE008A4CB1 /* NSTextViewExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSTextViewExtension.swift; sourceTree = "<group>"; };
+		AAD71D471D9CF57D0070841B /* Haskell.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Haskell.plist; sourceTree = "<group>"; };
+		AAD71D491D9CF8F90070841B /* Racket.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Racket.plist; sourceTree = "<group>"; };
+		AAD71D4D1D9CFB400070841B /* Environments.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Environments.plist; sourceTree = "<group>"; };
+		AAD71D4F1D9CFB910070841B /* EnvironmentHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentHandler.swift; sourceTree = "<group>"; };
+		AAD71D511D9CFF700070841B /* EnvironmentSelectViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentSelectViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,7 +50,7 @@
 		AA0EAC321D88702D008A4CB1 = {
 			isa = PBXGroup;
 			children = (
-				AA0EAC3D1D88702D008A4CB1 /* GHCIWrapper */,
+				AA0EAC3D1D88702D008A4CB1 /* REPLWrapper */,
 				AA0EAC3C1D88702D008A4CB1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,21 +58,25 @@
 		AA0EAC3C1D88702D008A4CB1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA0EAC3B1D88702D008A4CB1 /* GHCIWrapper.app */,
+				AA0EAC3B1D88702D008A4CB1 /* REPLWrapper.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AA0EAC3D1D88702D008A4CB1 /* GHCIWrapper */ = {
+		AA0EAC3D1D88702D008A4CB1 /* REPLWrapper */ = {
 			isa = PBXGroup;
 			children = (
+				AAD71D461D9CF5250070841B /* Environments (plists) */,
 				AA0EAC4D1D88799F008A4CB1 /* UI */,
 				AA0EAC3E1D88702D008A4CB1 /* AppDelegate.swift */,
 				AA0EAC401D88702D008A4CB1 /* ViewController.swift */,
 				AA0EAC421D88702D008A4CB1 /* Assets.xcassets */,
 				AA0EAC441D88702D008A4CB1 /* Main.storyboard */,
 				AA0EAC471D88702D008A4CB1 /* Info.plist */,
+				AAD71D4F1D9CFB910070841B /* EnvironmentHandler.swift */,
+				AAD71D511D9CFF700070841B /* EnvironmentSelectViewController.swift */,
 			);
+			name = REPLWrapper;
 			path = GHCIWrapper;
 			sourceTree = "<group>";
 		};
@@ -75,12 +89,22 @@
 			name = UI;
 			sourceTree = "<group>";
 		};
+		AAD71D461D9CF5250070841B /* Environments (plists) */ = {
+			isa = PBXGroup;
+			children = (
+				AAD71D471D9CF57D0070841B /* Haskell.plist */,
+				AAD71D491D9CF8F90070841B /* Racket.plist */,
+				AAD71D4D1D9CFB400070841B /* Environments.plist */,
+			);
+			name = "Environments (plists)";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AA0EAC3A1D88702D008A4CB1 /* GHCIWrapper */ = {
+		AA0EAC3A1D88702D008A4CB1 /* REPLWrapper */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AA0EAC4A1D88702D008A4CB1 /* Build configuration list for PBXNativeTarget "GHCIWrapper" */;
+			buildConfigurationList = AA0EAC4A1D88702D008A4CB1 /* Build configuration list for PBXNativeTarget "REPLWrapper" */;
 			buildPhases = (
 				AA0EAC371D88702D008A4CB1 /* Sources */,
 				AA0EAC381D88702D008A4CB1 /* Frameworks */,
@@ -90,9 +114,9 @@
 			);
 			dependencies = (
 			);
-			name = GHCIWrapper;
+			name = REPLWrapper;
 			productName = GHCIWrapper;
-			productReference = AA0EAC3B1D88702D008A4CB1 /* GHCIWrapper.app */;
+			productReference = AA0EAC3B1D88702D008A4CB1 /* REPLWrapper.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -111,7 +135,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AA0EAC361D88702D008A4CB1 /* Build configuration list for PBXProject "GHCIWrapper" */;
+			buildConfigurationList = AA0EAC361D88702D008A4CB1 /* Build configuration list for PBXProject "REPLWrapper" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -124,7 +148,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AA0EAC3A1D88702D008A4CB1 /* GHCIWrapper */,
+				AA0EAC3A1D88702D008A4CB1 /* REPLWrapper */,
 			);
 		};
 /* End PBXProject section */
@@ -134,7 +158,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAD71D4A1D9CF8F90070841B /* Racket.plist in Resources */,
+				AAD71D4E1D9CFB400070841B /* Environments.plist in Resources */,
 				AA0EAC431D88702D008A4CB1 /* Assets.xcassets in Resources */,
+				AAD71D481D9CF57D0070841B /* Haskell.plist in Resources */,
 				AA0EAC461D88702D008A4CB1 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -146,9 +173,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAD71D521D9CFF700070841B /* EnvironmentSelectViewController.swift in Sources */,
 				AA0EAC411D88702D008A4CB1 /* ViewController.swift in Sources */,
 				AA0C9DF71D8A84FA00D4D966 /* CommandTextField.swift in Sources */,
 				AA0EAC3F1D88702D008A4CB1 /* AppDelegate.swift in Sources */,
+				AAD71D501D9CFB910070841B /* EnvironmentHandler.swift in Sources */,
 				AA0EAC4F1D8879AE008A4CB1 /* NSTextViewExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -283,7 +312,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA0EAC361D88702D008A4CB1 /* Build configuration list for PBXProject "GHCIWrapper" */ = {
+		AA0EAC361D88702D008A4CB1 /* Build configuration list for PBXProject "REPLWrapper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA0EAC481D88702D008A4CB1 /* Debug */,
@@ -292,7 +321,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AA0EAC4A1D88702D008A4CB1 /* Build configuration list for PBXNativeTarget "GHCIWrapper" */ = {
+		AA0EAC4A1D88702D008A4CB1 /* Build configuration list for PBXNativeTarget "REPLWrapper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AA0EAC4B1D88702D008A4CB1 /* Debug */,

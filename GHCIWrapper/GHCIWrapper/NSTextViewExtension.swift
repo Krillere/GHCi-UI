@@ -1,6 +1,6 @@
 //
 //  NSTextViewExtension.swift
-//  GHCIWrapper
+//  REPLWrapper
 //
 //  Created by Christian Lundtofte on 13/09/2016.
 //  Copyright © 2016 Christian Lundtofte. All rights reserved.
@@ -24,5 +24,9 @@ extension NSTextView {
     }
     func setText(_ text: String) {
         self.textStorage?.setAttributedString(NSAttributedString(string: text))
+        
+        let f = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: 0)
+        self.textStorage?.font = f
+        self.typingAttributes = [NSFontAttributeName : f]
     }
 }

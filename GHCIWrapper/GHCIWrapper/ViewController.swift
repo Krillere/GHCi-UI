@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  GHCIWrapper
+//  REPLWrapper
 //
 //  Created by Christian Lundtofte on 13/09/2016.
 //  Copyright © 2016 Christian Lundtofte. All rights reserved.
@@ -10,8 +10,8 @@ import Cocoa
 
 class ViewController: NSViewController {
     
-    // GHCI variabler
-    var GHCIPath:String?
+    // REPL variabler
+    var REPLPath:String?
     var proc:Process?
     
     var outputPipe:Pipe?
@@ -28,7 +28,6 @@ class ViewController: NSViewController {
     // Filhåndtering
     var isFileOpen:Bool = false
     var currentFileOpen:String?
-    let haskellFileTypes:Array<String> = ["hs", "lhs", "o", "so"]
     
     // UI komponenter
     @IBOutlet var consoleLogView:NSTextView!
@@ -40,25 +39,49 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.runCode(_:)), name: NSNotification.Name(rawValue: "RunClicked"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.openFileClicked), name: NSNotification.Name(rawValue: "OpenClicked"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.saveFileClicked), name: NSNotification.Name(rawValue: "SaveClicked"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.saveAsFileClicked), name: NSNotification.Name(rawValue: "SaveAsClicked"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.upPushed), name: NSNotification.Name(rawValue: "UpPushed"), object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.downPushed), name: NSNotification.Name(rawValue: "DownPushed"), object: nil)
+        let f = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: 0)
+        codeTextView.textStorage?.font = f
+        codeTextView.typingAttributes = [NSFontAttributeName : f]
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.runCode(_:)),
+                                               name: NSNotification.Name(rawValue: "RunClicked"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.openFileClicked),
+                                               name: NSNotification.Name(rawValue: "OpenClicked"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.saveFileClicked),
+                                               name: NSNotification.Name(rawValue: "SaveClicked"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.saveAsFileClicked),
+                                               name: NSNotification.Name(rawValue: "SaveAsClicked"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.upPushed),
+                                               name: NSNotification.Name(rawValue: "UpPushed"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.downPushed),
+                                               name: NSNotification.Name(rawValue: "DownPushed"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.newEnvironment),
+                                               name: NSNotification.Name(rawValue: "NewEnvironmentLoaded"), object: nil)
     }
     
     override func viewDidAppear() {
         super.viewDidAppear()
         
-        // Find GHCi sti eller bed brugeren om at finde den
-        GHCIPath = tryFindGHCIPath()
-        if GHCIPath == nil {
-            showNoGHCIError()
+        // Har vi sat environment?
+        if !EnvironmentHandler.shared.hasEnvironment() {
+            self.showSelectEnvironmentWindow()
             return
         }
         
-        setupNewGHCITask([])
+        // Find sti eller bed brugeren om at finde den
+        REPLPath = tryFindREPLPath()
+        if REPLPath == nil {
+            showNoExecutableError()
+            return
+        }
+        
+        setupNewREPLTask([])
     }
 
     
@@ -113,7 +136,7 @@ class ViewController: NSViewController {
     
     func saveAsFileClicked() {
         let panel = NSSavePanel()
-        panel.allowedFileTypes = haskellFileTypes
+        panel.allowedFileTypes = EnvironmentHandler.shared.selectedEnvironmentFileTypes
         if currentFileOpen != nil {
             panel.nameFieldStringValue = currentFileOpen!
         }
@@ -177,19 +200,20 @@ class ViewController: NSViewController {
     
     
     // MARK: Andet UI
-    func showNoGHCIError() {
+    func showNoExecutableError() {
+        guard let env = EnvironmentHandler.shared.selectedEnvironment else { return }
         let window = NSApplication.shared().windows[0]
         
         let alert = NSAlert()
-        alert.messageText = "No CHGi found"
-        alert.informativeText = "GHCi was not found. Would you like to locate the executable yourself?"
+        alert.messageText = "No executable found"
+        alert.informativeText = "An executable for the environment \(env) was not found. Would you like to locate the executable yourself?"
         alert.alertStyle = .critical
         alert.addButton(withTitle: "Yes")
         alert.addButton(withTitle: "No")
         
         alert.beginSheetModal(for: window, completionHandler: { (response) in
             if response == NSAlertFirstButtonReturn {
-                self.userFindGGHCI()
+                self.userFindExecutable()
             }
             else {
                 self.disableUI()
@@ -211,27 +235,31 @@ class ViewController: NSViewController {
         }) 
     }
     
-    // Lad brugeren finde GHCi selv
-    func userFindGGHCI() {
+    func showSelectEnvironmentWindow() {
+        self.performSegue(withIdentifier: "SelectEnvironment", sender: self)
+    }
+    
+    // Lad brugeren finde REPL selv
+    func userFindExecutable() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
         panel.canSelectHiddenExtension = true
-        panel.title = "Locate and select GHCi executable"
+        panel.title = "Locate and select executable"
         panel.prompt = "Use"
         
         panel.beginSheetModal(for: NSApplication.shared().windows[0]) { (response) in
             if let selectedURL = panel.url {
-                if self.testGHCIURL(selectedURL) { // HVis URL'en er korrekt, så gem og fortsæt
+                if self.testREPLURL(selectedURL) { // HVis URL'en er korrekt, så gem og fortsæt
                     print("Gemmer sti: \(selectedURL)")
-                    UserDefaults.standard.setValue(selectedURL.absoluteString, forKey: "GHCiPath")
+                    UserDefaults.standard.setValue(selectedURL.absoluteString, forKey: "REPLPath")
                     UserDefaults.standard.synchronize()
                     
                     self.enableUI()
                 }
                 else { // Lad ham prøve igen..
-                    self.showNoGHCIError()
+                    self.showNoExecutableError()
                 }
             }
         }
@@ -248,21 +276,29 @@ class ViewController: NSViewController {
     }
     
     func resetUI() {
-        killGHCI()
+        killREPL()
         //previousCommands.removeAll()
+        
+        REPLPath = tryFindREPLPath()
+        if REPLPath == nil {
+            showNoExecutableError()
+            return
+        }
         
         codeTextView.clear()
         consoleLogView.clear()
-        
-        //commandView.stringValue = ""
     }
     
     func setWindowTitle() {
+        var add = ""
+        if let env = EnvironmentHandler.shared.selectedEnvironment {
+            add = " (\(env))"
+        }
         if isFileOpen && currentFileOpen != nil {
-            self.view.window?.title = "GHCi UI - "+currentFileOpen!
+            self.view.window?.title = "REPL UI\(add) - "+currentFileOpen!
         }
         else {
-            self.view.window?.title = "GHCi UI"
+            self.view.window?.title = "REPL UI\(add)"
         }
     }
     
@@ -271,11 +307,11 @@ class ViewController: NSViewController {
     func saveAndRunCode() {
         let cont = (codeTextView.textStorage as NSAttributedString!).string
         do {
-            let path = NSTemporaryDirectory()+"tmp.hs"
+            let path = NSTemporaryDirectory()+"tmp"
             try cont.write(toFile: path, atomically: true, encoding: String.Encoding.utf8)
             consoleLogView.clear()
             
-            runHaskellFile(URL(string: path)!)
+            runWithFile(URL(string: path)!)
             commandView.becomeFirstResponder()
         }
         catch { }
@@ -286,7 +322,7 @@ class ViewController: NSViewController {
         panel.allowsMultipleSelection = false
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
-        panel.allowedFileTypes = haskellFileTypes
+        panel.allowedFileTypes = EnvironmentHandler.shared.selectedEnvironmentFileTypes
         
         panel.beginSheetModal(for: NSApplication.shared().windows[0]) { (resp) in
             if resp == 1 {
@@ -310,80 +346,72 @@ class ViewController: NSViewController {
     
     
     // MARK: Task og pipes
-    // Tester om det der er på en sti er GHCi
-    func testGHCIURL(_ URL: Foundation.URL) -> Bool {
+    func newEnvironment() {
+        resetUI()
+        
+        setupNewREPLTask([])
+    }
+    
+    // Tester om det der er på en sti er rigtigt
+    func testREPLURL(_ URL: Foundation.URL) -> Bool {
         let path = URL.path
+        
         if !FileManager.default.fileExists(atPath: path) {
             print("Ingen fil på valgt placering: \(path)")
             return false
         }
         
-        // Kør app og se om det ser rigtigt ud
-        let pipe = Pipe()
-        let file = pipe.fileHandleForReading
-        
-        let task = Process()
-        task.launchPath = URL.path
-        task.arguments = ["--version"]
-        task.standardOutput = pipe
-        
-        task.launch()
-        
-        let data = file.readDataToEndOfFile()
-        file.closeFile()
-        
-        if let string = String(data: data, encoding: String.Encoding.utf8) {
-            // Meget naivt.. :P
-            if string.contains("Haskell") {
-                return true
-            }
-        }
-        
-        
-        return false
+        return true
     }
     
-    // Forsøger at finde GHCi ud fra kendte stier
-    func tryFindGHCIPath() -> String? {
+    // Forsøger at finde REPL ud fra kendte stier
+    func tryFindREPLPath() -> String? {
         // Har vi den gemt allerede?
-        if let remembered = UserDefaults.standard.value(forKey: "GHCiPath") as? String {
+        if let remembered = UserDefaults.standard.value(forKey: "CustomREPLPath") as? String {
             if FileManager.default.fileExists(atPath: remembered) {
                 return remembered
             }
         }
         
+        if !EnvironmentHandler.shared.hasEnvironment() {
+            return nil
+        }
+        
         // Forsøg at finde stien
-        let defaultLocations = ["/usr/local/bin/ghci", "/usr/bin/ghci", "~/Library/Haskell/bin/ghci"]
+        let defaultLocations = EnvironmentHandler.shared.defaultPaths
+        print("Mine default paths: \(defaultLocations)")
         var foundLoc:String?
         
         for loc in defaultLocations {
             if FileManager.default.fileExists(atPath: loc) {
-                print("Fundet GHCI ved: \(loc)")
+                print("Fundet REPL ved: \(loc)")
                 
                 foundLoc = loc
                 break
             }
         }
         
+        
         // Gem lokalt hvis ikke gjort før
-        if foundLoc != nil && UserDefaults.standard.value(forKey: "GHCiPath") == nil {
+        /*if foundLoc != nil && UserDefaults.standard.value(forKey: "CustomREPLPath") == nil {
             print("Gemmer sti!")
-            UserDefaults.standard.setValue(foundLoc, forKey: "GHCiPath")
+            UserDefaults.standard.setValue(foundLoc, forKey: "CustomREPLPath")
             UserDefaults.standard.synchronize()
-        }
+        }*/
         
         return foundLoc
     }
     
-    // Laver ny, ren GHCi task
-    func setupNewGHCITask(_ arguments: [String]) {
-        guard let path = GHCIPath else { return }
+    // Laver ny, ren REPL task
+    func setupNewREPLTask(_ arguments: [String]) {
+        guard let path = REPLPath else { return }
         
+        print("Starter: \(REPLPath)")
         proc = Process()
         proc?.launchPath = path
         proc?.arguments = arguments
         
-        // Output pipe (Det vi modtager fra ghci)
+        // Output pipe (Det vi modtager)
         outputPipe = Pipe()
         errorPipe = Pipe()
         proc?.standardOutput = outputPipe
@@ -409,15 +437,31 @@ class ViewController: NSViewController {
         commandView.becomeFirstResponder()
     }
     
-    func runHaskellFile(_ file: URL) {
-        let filePath = file.path
-        setupNewGHCITask([filePath])
+    func runWithFile(_ file: URL) {
+        if let loadArg = EnvironmentHandler.shared.selectedEnvironmentLoadingArgument {
+            let filePath = file.path
+            
+            setupNewREPLTask([loadArg, filePath])
+        }
     }
     
     // Stopper nuværende task og pipes
-    func killGHCI() {
-        proc?.terminate()
+    func killREPL() {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSFileHandleDataAvailable, object: readHandle)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.NSFileHandleDataAvailable, object: errorHandle)
+        
+        proc?.terminate()
+        proc?.waitUntilExit()
+        
+        proc = nil
+        outputPipe = nil
+        errorPipe = nil
+        readHandle = nil
+        errorHandle = nil
+        
+        inputPipe = nil
+        writeHandle = nil
+        print("Dræbt process!")
     }
     
     

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Name</key>
+	<string>Racket</string>
+	<key>LoadArgument</key>
+	<string>-if</string>
+	<key>FileTypes</key>
+	<array>
+		<string>rkt</string>
+	</array>
+	<key>KnownPaths</key>
+	<array>
+		<string>/Applications/Racket v6.6/bin/racket</string>
+	</array>
+</dict>
+</plist>
